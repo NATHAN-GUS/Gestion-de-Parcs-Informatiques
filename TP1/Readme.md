@@ -580,7 +580,7 @@ to: sysadmin
 
 🌞 Tester que ça fonctionne !
 ```sh
-[Suite : serveur Discord pour les alertes](https://discord.gg/tcQkfdXq)
+Popopp lien vers [ Serveur Discord pour les alertes](https://discord.com/channels/@me/1304004184022188062/1315643424807977013).
 ```
 
 
