@@ -114,9 +114,9 @@ Port 8709
 * Firewall
   ```sh
   [nathan@web ~]$ sudo firewall-cmd --permanent --remove-port=22/tcp
-success
+ success
 [nathan@web ~]$ sudo firewall-cmd --permanent --add-port=8709/tcp
-success
+ success
 [nathan@web ~]$ sudo firewall-cmd --reload
 success
 ```
