@@ -523,13 +523,13 @@ jobs:
  * serveur SSH de web.tp1.b1
    ```sh
    [nathan@monotoring netdata]$ sudo ./edit-config go.d/portcheck.conf
-[sudo] password for nathan:
-Editing '/etc/netdata/go.d/portcheck.conf' ...
-[nathan@monotoring netdata]$ sudo systemctl restart netdata
+   [sudo] password for nathan:
+   Editing '/etc/netdata/go.d/portcheck.conf' ...
+   [nathan@monotoring netdata]$ sudo systemctl restart netdata
    
- - name: SSH_web.tp1.b1
-   host: 10.0.0.2
-   ports:
+  - name: SSH_web.tp1.b1
+    host: 10.0.0.2
+    ports:
         -22
    ```
 
