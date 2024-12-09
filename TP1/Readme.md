@@ -531,9 +531,9 @@ jobs:
     host: 10.0.0.2
     ports:
         -22
-   ```
+     ```
 
-  ### 4. Ajouter des alertes 
+   ### 4. Ajouter des alertes 
   
   🌞 Configurer l'alerting avec Discord   
   ```sh
