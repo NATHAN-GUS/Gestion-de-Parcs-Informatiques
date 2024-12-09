@@ -119,6 +119,9 @@ success
 success
 [nathan@web ~]$ sudo firewall-cmd --reload
 success
+```
+
+````sh
 [nathan@web ~]$ sudo firewall-cmd --list-all | grep 8709
   ports: 8709/tcp
   ```
