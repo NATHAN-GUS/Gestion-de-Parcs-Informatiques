@@ -552,6 +552,36 @@ DEFAULT_RECIPIENT_DISCORD="alerts"
 
 🌞 Tester que ça fonctionne
 ```sh
+--- END received response ---
+RECEIVED HTTP RESPONSE CODE: 200
+time=2024-12-09T07:47:43.314+01:00 comm=alarm-notify.sh source=health level=info tid=22732 thread=alarm-notify msg_id=6db0018e83e34320ae2a659d78019fb7 node=monotoring.tp1.b1 instance=test.chart alert_id=1 alert_unique_id=1 alert=test_alarm alert_class=Test alert_recipient=sysadmin alert_duration=1 alert_value=100 alert_value_old=90 alert_status=CLEAR alert_value_old=CRITICAL alert_units=units alert_summary="a test alarm" alert_info="this is a test alarm to verify notifications work" request="'/usr/libexec/netdata/plugins.d/alarm-notify.sh' 'sysadmin' 'monotoring.tp1.b1' '1' '1' '3' '1733726862' 'test_alarm' 'test.chart' 'CLEAR' 'CRITICAL' '100' '90' '/usr/libexec/netdata/plugins.d/alarm-notify.sh' '1' '3' 'units' 'this is a test alarm to verify notifications work' 'new value' 'old value' 'evaluated expression' 'expression variable values' '0' '0' '' '' 'Test' 'command to edit the alarm=0=monotoring.tp1.b1' '' '' 'a test alarm' " msg="[ALERT NOTIFICATION]: sent discord notification to 'alerts' for notification to 'sysadmin' for transition from CRITICAL to CLEAR, of alert 'test_alarm' = 'new value', of instance 'test.chart', context '' on host 'monotoring.tp1.b1'"
+# OK
+```
+
+🌞 Euh... tester que ça fonctionne pour de vrai
+```sh
+
+
+ 🌞 Configurer une alerte quand le port du serveur Web ne répond plus
+* Creation du ficher dans 
+```sh
+template: web_server_down
+on: portcheck.WEB_http.tp1.b1
+lookup: average -20s unaligned of availability
+every: 5s
+warn: $this < 1
+crit: $this < 1
+delay: down 20s
+repeat: every 20s
+units: %
+info: Web server is down
+to: sysadmin
+```
+
+🌞 Tester que ça fonctionne !
+```sh
+[Suite : serveur Discord pour les alertes](https://discord.gg/tcQkfdXq)
+```
 
 
 
