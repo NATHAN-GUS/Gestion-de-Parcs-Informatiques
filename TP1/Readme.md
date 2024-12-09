@@ -526,14 +526,12 @@ jobs:
    [sudo] password for nathan:
    Editing '/etc/netdata/go.d/portcheck.conf' ...
    [nathan@monotoring netdata]$ sudo systemctl restart netdata
-   ```
    
-   ```sh
-  - name: SSH_web.tp1.b1
-    host: 10.0.0.2
-    ports:
+   - name: SSH_web.tp1.b1
+     host: 10.0.0.2
+     ports:
         -22
-     ```
+    ```
 
    ### 4. Ajouter des alertes 
   
