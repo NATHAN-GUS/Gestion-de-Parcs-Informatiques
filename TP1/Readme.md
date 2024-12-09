@@ -476,10 +476,10 @@ LISTEN 0      4096            [::]:19999         [::]:*    users:(("netdata",pid
 * Ouvrit le port
   ```sh
   [nathan@monotoring ~]$ sudo firewall-cmd --permanent --add-port=19999/tcp
-Warning: ALREADY_ENABLED: 19999:tcp
-success
-[nathan@monotoring ~]$ sudo firewall --reload
-```
+  Warning: ALREADY_ENABLED: 19999:tcp
+  success
+  [nathan@monotoring ~]$ sudo firewall --reload
+ ```
 
 🌞 Visiter l'interface Web
 ```sh
