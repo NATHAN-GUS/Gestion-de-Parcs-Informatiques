@@ -357,6 +357,10 @@ echo "[$DATE] Video $URL was downloaded. File path : $VIDEO_DIR/$VIDEO_NAME.mp4"
 [24/12/23 13:54:46] Video https://youtu.be/OV_Jfs_MytQ?si=lfms9WqHCFX_nc4h was downloaded. File path : /opt/yt/downloads/Coca-Cola dévoile sa nouvelle pub télé - Ouvre un Coca-Cola/Coca-Cola dévoile sa nouvelle pub télé - Ouvre un Coca-Cola.mp4
 ```
 
+# 2. MAKE IT A SERVICE
+## A. Adaptation du script
+
+
   
 
 
