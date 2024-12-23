@@ -301,6 +301,65 @@ echo -e "Voilà ta photo de chat : ${BLUE}$CAT_URL${NC}"
 ```
 
 # Partie III : Script yt-dlp
+## 1. Premier script yt-dlp
+### B. Rendu attendu
+
+🌞 Vous fournirez dans le compte-rendu :
+- script
+```sh
+#!/bin/bash
+
+URL=$1
+DOWNLOAD_DIR="/opt/yt/downloads"
+
+# Vérifier que le dossier de téléchargement existe
+if [[ ! -d "$DOWNLOAD_DIR" ]]; then
+    echo "Le dossier $DOWNLOAD_DIR n'existe pas."
+    exit 1
+fi
+
+# Récupérer le nom de la vidéo
+VIDEO_NAME=$(yt-dlp --get-filename -o "%(title)s" "$URL")
+
+# Créer le dossier pour la vidéo
+VIDEO_DIR="$DOWNLOAD_DIR/$VIDEO_NAME"
+mkdir -p "$VIDEO_DIR"
+
+# Télécharger la vidéo et la description en masquant la sortie
+yt-dlp -o "$VIDEO_DIR/$VIDEO_NAME.mp4" "$URL" > /dev/null 2>&1
+yt-dlp --write-description -o "$VIDEO_DIR/description" "$URL" > /dev/null 2>&1
+
+# Afficher le message de succès
+echo "Video $URL was downloaded."
+echo "File path : $VIDEO_DIR/$VIDEO_NAME.mp4"
+
+# Ajouter une ligne de log
+LOG_FILE="/var/log/yt/download.log"
+
+if [[ ! -d "/var/log/yt" ]]; then
+    echo "Le dossier /var/log/yt n'existe pas."
+    exit 1
+fi
+
+DATE=$(date '+%y/%m/%d %H:%M:%S')
+echo "[$DATE] Video $URL was downloaded. File path : $VIDEO_DIR/$VIDEO_NAME.mp4" >> "$LOG_FILE"
+```
+
+- lignes de logs
+ ```sh
+[nathan@node1 downloads]$ cat /var/log/yt/download.log
+[24/12/16 05:49:06] Video https://www.youtube.com/watch?v=g4xs_5rZdos was downloaded. File path : /opt/yt/downloads//.mp4
+[24/12/16 11:08:26] Video https://www.youtube.com/watch?v=g4xs_5rZdos was downloaded. File path : /opt/yt/downloads/Watch a 10 sec Coca Cola Commercial/Watch a 10 sec Coca Cola Commercial.mp4
+[24/12/16 11:31:57] Video https://www.youtube.com/watch?v=g4xs_5rZdos was downloaded. File path : /opt/yt/downloads/Watch a 10 sec Coca Cola Commercial/Watch a 10 sec Coca Cola Commercial.mp4
+[24/12/16 11:37:25] Video https://www.youtube.com/watch?v=g4xs_5rZdos was downloaded. File path : /opt/yt/downloads/Watch a 10 sec Coca Cola Commercial/Watch a 10 sec Coca Cola Commercial.mp4
+[24/12/16 11:37:57] Video https://www.youtube.com/watch?v=g4xs_5rZdos was downloaded. File path : /opt/yt/downloads/Watch a 10 sec Coca Cola Commercial/Watch a 10 sec Coca Cola Commercial.mp4
+[24/12/23 13:47:53] Video https://youtu.be/OV_Jfs_MytQ?si=lfms9WqHCFX_nc4h was downloaded. File path : /opt/yt/downloads/Coca-Cola dévoile sa nouvelle pub télé - Ouvre un Coca-Cola/Coca-Cola dévoile sa nouvelle pub télé - Ouvre un Coca-Cola.mp4
+[24/12/23 13:54:46] Video https://youtu.be/OV_Jfs_MytQ?si=lfms9WqHCFX_nc4h was downloaded. File path : /opt/yt/downloads/Coca-Cola dévoile sa nouvelle pub télé - Ouvre un Coca-Cola/Coca-Cola dévoile sa nouvelle pub télé - Ouvre un Coca-Cola.mp4
+```
+
+  
+
+
 
 
 
