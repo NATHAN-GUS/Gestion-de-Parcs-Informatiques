@@ -129,6 +129,8 @@ Python est bien installé sur la machine au chemin : /usr/bin/python3
 ## 3. Amélioration du script
 
 🌞 Le script id.sh affiche l'état du firewall et l'URL vers une photo de chat random
+```sh
+[nathan@node1 opt]$ sudo  nano id.sh
 #!/bin/bash
 
 USER=$(whoami)
@@ -165,6 +167,7 @@ echo "Python est bien installé sur la machine au chemin : $PYTHON"
 echo "$FIREWALL"
 echo "Voilà ta photo de chat : $CAT_URL"
 ```
+
 ```sh
 Salu a toa nathan.
 Nouvelle connexion 23/12/24 15:20:09.
