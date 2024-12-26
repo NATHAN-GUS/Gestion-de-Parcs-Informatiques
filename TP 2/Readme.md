@@ -309,41 +309,65 @@ echo -e "Voilà ta photo de chat : ${BLUE}$CAT_URL${NC}"
 ```sh
 #!/bin/bash
 
-URL=$1
-DOWNLOAD_DIR="/opt/yt/downloads"
+# Vérifier que l'URL de la vidéo est passée en argument
+if [[ -z "$1" ]]; then
+  echo "Usage: $0 <youtube_video_url>"
+  exit 1
+fi
 
-# Vérifier que le dossier de téléchargement existe
+VIDEO_URL=$1
+
+# Vérifier que le dossier /opt/yt/downloads/ existe, sinon le créer
+DOWNLOAD_DIR="/opt/yt/downloads"
 if [[ ! -d "$DOWNLOAD_DIR" ]]; then
-    echo "Le dossier $DOWNLOAD_DIR n'existe pas."
-    exit 1
+  mkdir -p "$DOWNLOAD_DIR"
+
 fi
 
 # Récupérer le nom de la vidéo
-VIDEO_NAME=$(yt-dlp --get-filename -o "%(title)s" "$URL")
+VIDEO_NAME=$(yt-dlp --get-title "$VIDEO_URL" 2>/dev/null)
+if [[ -z "$VIDEO_NAME" ]]; then
+  echo "Impossible de récupérer le nom de la vidéo."
+  exit 1
+fi
 
 # Créer le dossier pour la vidéo
 VIDEO_DIR="$DOWNLOAD_DIR/$VIDEO_NAME"
 mkdir -p "$VIDEO_DIR"
 
-# Télécharger la vidéo et la description en masquant la sortie
-yt-dlp -o "$VIDEO_DIR/$VIDEO_NAME.mp4" "$URL" > /dev/null 2>&1
-yt-dlp --write-description -o "$VIDEO_DIR/description" "$URL" > /dev/null 2>&1
 
-# Afficher le message de succès
-echo "Video $URL was downloaded."
-echo "File path : $VIDEO_DIR/$VIDEO_NAME.mp4"
+# Télécharger la vidéo
+yt-dlp -o "$VIDEO_DIR/$VIDEO_NAME.mp4" "$VIDEO_URL" >/dev/null 2>&1
+
+# Télécharger la description de la vidéo
+yt-dlp --write-description --skip-download -o "$VIDEO_DIR/description" "$VIDEO_URL" >/dev/null 2>&1
+
+# Vérifier que le dossier /var/log/yt/ existe, sinon le créer
+LOG_DIR="/var/log/yt"
+if [[ ! -d "$LOG_DIR" ]]; then
+  mkdir -p "$LOG_DIR"
+
+fi
 
 # Ajouter une ligne de log
-LOG_FILE="/var/log/yt/download.log"
+LOG_FILE="$LOG_DIR/download.log"
+DATE=$(date +"%y/%m/%d %H:%M:%S")
+echo "[$DATE] Video $VIDEO_URL was downloaded. File path : $VIDEO_DIR/$VIDEO_NAME.mp4" >> "$LOG_FILE"
 
-if [[ ! -d "/var/log/yt" ]]; then
-    echo "Le dossier /var/log/yt n'existe pas."
-    exit 1
-fi
+
+# Sortie personnalisée
+echo "Video $VIDEO_URL was downloaded."
+echo "File path : $VIDEO_DIR/$VIDEO_NAME.mp4"
 
 DATE=$(date '+%y/%m/%d %H:%M:%S')
 echo "[$DATE] Video $URL was downloaded. File path : $VIDEO_DIR/$VIDEO_NAME.mp4" >> "$LOG_FILE"
 ```
+- exemple d'exécution
+  ```sh
+  [nathan@node1 downloads]$ /opt/yt.sh https://www.youtube.com/watch?v=AbILPD3ZsZY
+  Video https://www.youtube.com/watch?v=AbILPD3ZsZY was downloaded.
+  File path : /opt/yt/downloads/Coca-Cola to Turn Up the Moment/Coca-Cola to Turn Up the Moment.mp4
+ ```
 
 - lignes de logs
  ```sh
@@ -355,6 +379,12 @@ echo "[$DATE] Video $URL was downloaded. File path : $VIDEO_DIR/$VIDEO_NAME.mp4"
 [24/12/16 11:37:57] Video https://www.youtube.com/watch?v=g4xs_5rZdos was downloaded. File path : /opt/yt/downloads/Watch a 10 sec Coca Cola Commercial/Watch a 10 sec Coca Cola Commercial.mp4
 [24/12/23 13:47:53] Video https://youtu.be/OV_Jfs_MytQ?si=lfms9WqHCFX_nc4h was downloaded. File path : /opt/yt/downloads/Coca-Cola dévoile sa nouvelle pub télé - Ouvre un Coca-Cola/Coca-Cola dévoile sa nouvelle pub télé - Ouvre un Coca-Cola.mp4
 [24/12/23 13:54:46] Video https://youtu.be/OV_Jfs_MytQ?si=lfms9WqHCFX_nc4h was downloaded. File path : /opt/yt/downloads/Coca-Cola dévoile sa nouvelle pub télé - Ouvre un Coca-Cola/Coca-Cola dévoile sa nouvelle pub télé - Ouvre un Coca-Cola.mp4
+[24/12/25 19:56:49] Video https://www.youtube.com/watch?v=AbILPD3ZsZY was downloaded. File path : /opt/yt/downloads/Coca-Cola to Turn Up the Moment/Coca-Cola to Turn Up the Moment.mp4
+[24/12/25 19:57:26] Video https://www.youtube.com/watch?v=AbILPD3ZsZY was downloaded. File path : /opt/yt/downloads//.mp4
+[24/12/25 19:58:06] Video  was downloaded. File path : /opt/yt/downloads//.mp4
+[24/12/25 23:47:43] Video https://www.youtube.com/watch?v=AbILPD3ZsZY was downloaded. File path : /opt/yt/downloads/Coca-Cola to Turn Up the Moment/Coca-Cola to Turn Up the Moment.mp4
+[24/12/26 00:26:20] Video https://www.youtube.com/watch?v=AbILPD3ZsZY was downloaded. File path : /opt/yt/downloads/Coca-Cola to Turn Up the Moment/Coca-Cola to Turn Up the Moment.mp4
+[24/12/26 00:27:53] Video https://www.youtube.com/watch?v=AbILPD3ZsZY was downloaded. File path : /opt/yt/downloads/Coca-Cola to Turn Up the Moment/Coca-Cola to Turn Up the Moment.mp4
 ```
 
 # 2. MAKE IT A SERVICE
