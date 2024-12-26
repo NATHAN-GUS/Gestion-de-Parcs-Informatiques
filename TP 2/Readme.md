@@ -358,7 +358,11 @@ echo "[$DATE] Video $URL was downloaded. File path : $VIDEO_DIR/$VIDEO_NAME.mp4"
 ```
 
 # 2. MAKE IT A SERVICE
-## A. Adaptation du script
+## C. Rendu attendu
+
+🌞 Toutes les commandes que vous utilisez
+
+
 
 
   
