@@ -312,8 +312,9 @@ File path : /opt/yt/downloads/Coca-Cola to Turn Up the Moment/Coca-Cola to Turn 
 - Logs
   ```sh
   [nathan@node1 yt]$ cat /var/log/yt/download.log
-[24/12/27 02:39:34] Video https://www.youtube.com/watch?v=AbILPD3ZsZY was downloaded. File path : /opt/yt/downloads/Coca-Cola to Turn Up the Moment/Coca-Cola to Turn Up the Moment.mp4
-```
+  [24/12/27 02:39:34] Video https://www.youtube.com/watch?v=AbILPD3ZsZY was downloaded. File path : /opt/yt/downloads/Coca-Cola to Turn Up the Moment/Coca-Cola to 
+  Turn Up the Moment.mp4
+ ```
 - Description 
 ```sh
 [nathan@node1 yt]$ ls
