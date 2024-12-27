@@ -1,1 +1,11 @@
 
+[Unit]
+Description=Youtube Video Downloader Service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/yt/yt-next-gen.sh
+User=yt
+
+[Install]
+WantedBy=multi-user.target
