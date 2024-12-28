@@ -334,7 +334,7 @@ downloads  yt.sh
 # 2. MAKE IT A SERVICE
 ## C. Rendu attendu
 
-🌞 Toutes les commandes que vous utilisez 
+🌞 Permissions de dossier  /opt/yt
    ```sh
    [nathan@node1 system]$ sudo useradd -r -s /sbin/nologin yt
     sudo chown -R yt:yt /opt/yt
