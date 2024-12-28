@@ -345,6 +345,36 @@ downloads  yt.sh
    ```
 
  # 3. Bonus
+ -  service + timer
+ ```sh
+[Unit]
+Description=Run yt.sh every 5 minutes
+
+[Timer]
+OnUnitActiveSec=5min
+OnBootSec=1min
+Unit=yt.service
+
+[Install]
+WantedBy=timers.target
+```
+
+- Exemple d'éxecution
+```sh
+[nathan@node1 yt]$ sudo systemctl daemon-reload
+[nathan@node1 yt]$ sudo systemctl enable yt.timer
+Created symlink /etc/systemd/system/timers.target.wants/yt.timer → /etc/systemd/system/yt.timer.
+[nathan@node1 yt]$ sudo systemctl start yt.timer
+[nathan@node1 yt]$ sudo systemctl status yt.timer
+● yt.timer - Run yt.sh every 5 minutes
+     Loaded: loaded (/etc/systemd/system/yt.timer; enabled; preset: disabled)
+     Active: active (waiting) since Fri 2024-12-27 23:05:00 CET; 3min 7s ago
+      Until: Fri 2024-12-27 23:05:00 CET; 3min 7s ago
+    Trigger: Fri 2024-12-27 23:10:00 CET; 1min 52s left
+   Triggers: ● yt.service
+
+Dec 27 23:05:00 node1.tp2.linux systemd[1]: Started Run yt.sh every 5 minutes.
+```
  
  
 
