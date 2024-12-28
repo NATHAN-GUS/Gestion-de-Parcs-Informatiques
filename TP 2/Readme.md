@@ -334,7 +334,14 @@ downloads  yt.sh
 # 2. MAKE IT A SERVICE
 ## C. Rendu attendu
 
-🌞 Toutes les commandes que vous utilisez
+🌞 Toutes les commandes que vous utilisez 
+   ```sh
+   [nathan@node1 system]$ sudo useradd -r -s /sbin/nologin yt
+    sudo chown -R yt:yt /opt/yt
+    sudo chown -R yt:yt /var/log/yt/
+    sudo usermod -L yt ( empeche l'utilisateur de se connecter)
+    sudo usermod -s /usr/sbin/nologin yt
+   ```
 
 
 
