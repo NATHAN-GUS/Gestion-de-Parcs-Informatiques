@@ -337,10 +337,11 @@ downloads  yt.sh
 🌞 Permissions de dossier  /opt/yt
    ```sh
    [nathan@node1 system]$ sudo useradd -r -s /sbin/nologin yt
-    sudo chown -R yt:yt /opt/yt
-    sudo chown -R yt:yt /var/log/yt/
     sudo usermod -L yt ( empeche l'utilisateur de se connecter)
     sudo usermod -s /usr/sbin/nologin yt
+    sudo chown -R yt:yt /opt/yt
+    sudo chown yt:yt /var/log/yt
+    sudo chown yt:yt /var/log/yt/download.log
    ```
 
 
