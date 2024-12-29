@@ -1,0 +1,87 @@
+#!/bin/bash
+
+# Fonction d'usage
+usage() {
+    echo "Usage: $0 [-q <quality>] [-o <output_dir>] <URL>"
+    echo "  -q <quality>   Specify video quality (e.g., 'best', '1080p', '720p')"
+    echo "  -o <output_dir> Specify an alternative download directory"
+    echo "  -h             Display this help message"
+    exit 1
+}
+
+# Vérification des commandes nécessaires
+for cmd in yt-dlp; do
+    if ! command -v $cmd &> /dev/null; then
+        echo "$cmd could not be found, please install it."
+        exit 1
+    fi
+done
+
+# Variables par défaut
+QUALITY="best"
+OUTPUT_DIR="/srv/yt/downloads"
+
+# Parsing des options
+while getopts ":hq:o:" opt; do
+    case ${opt} in
+        q )
+            QUALITY=$OPTARG
+            ;;
+        o )
+            OUTPUT_DIR=$OPTARG
+            ;;
+        h )
+            usage
+            ;;
+        \? )
+            echo "Invalid option: -$OPTARG" 1>&2
+            usage
+            ;;
+    esac
+done
+shift $((OPTIND -1))
+
+# Vérification de l'URL
+if [ $# -eq 0 ]; then
+    echo "URL argument is required."
+    usage
+fi
+
+URL=$1
+
+# Vérification de l'existence et des permissions du dossier de sortie
+if [[ ! -d "$OUTPUT_DIR" ]]; then
+    echo "Output directory $OUTPUT_DIR does not exist. Please create it."
+    exit 1
+elif [[ ! -w "$OUTPUT_DIR" ]]; then
+    echo "Output directory $OUTPUT_DIR is not writable. Please check permissions."
+    exit 1
+fi
+
+# Vérification que l'URL est une URL de vidéo YouTube valide
+if ! echo "$URL" | grep -Eq "^(https?://)?(www\.)?(youtube\.com/watch\?v=|youtu\.be/)[a-zA-Z0-9_-]{11}"; then
+    echo "[$DATE_LOG] Invalid YouTube video URL: $URL" >> /var/log/yt/download.log
+    exit 1
+fi
+
+# Récupérer le nom de la vidéo
+NOM_VIDEO=$(yt-dlp --get-filename -o "%(title)s" "$URL" 2>/dev/null)
+
+# Créer le dossier pour la vidéo
+mkdir -p "$OUTPUT_DIR/$NOM_VIDEO"
+
+# Télécharger la vidéo avec la qualité spécifiée
+yt-dlp -o "$OUTPUT_DIR/$NOM_VIDEO/$NOM_VIDEO.mp4" -f "$QUALITY" "$URL" > /dev/null 2>&1
+
+# Télécharger la description de la vidéo
+yt-dlp --write-description --skip-download -o "$OUTPUT_DIR/$NOM_VIDEO/description" "$URL" > /dev/null 2>&1
+
+# Formatte la date pour le log
+DATE_LOG=$(date '+%y/%m/%d %H:%M:%S')
+
+# Ajouter une ligne de log
+echo "[$DATE_LOG] Video $URL was downloaded. File path : $OUTPUT_DIR/$NOM_VIDEO/$NOM_VIDEO.mp4" >> /var/log/yt/download.log
+
+# Affiche la sortie personnalisée dans le terminal
+echo "Video $URL was downloaded."
+echo "File path : $OUTPUT_DIR/$NOM_VIDEO/$NOM_VIDEO.mp4"
