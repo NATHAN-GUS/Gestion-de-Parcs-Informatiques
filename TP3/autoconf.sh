@@ -13,13 +13,13 @@ log "INFO" "Le script d'autoconfiguration a démarré"
 
 log "INFO" "Le script a bien été lancé en root"
 
-if [[ "$(sestatus | grep 'Current mode' | awk '{print $3}')" != "enforcing" ]]; then
+if [[ "$(sestatus | grep 'Current mode' | awk '{print $3}')" != "permissive" ]]; then
     log "WARN" "SELinux est toujours activé !"
     log "INFO" "Désactivation de SELinux temporaire (setenforce)"
     setenforce 0
 fi
 
-if [[ "$(grep 'SELINUX=' /etc/selinux/config | awk '{print $2}')" != "enforcing" ]]; then
+if [[ "$(grep 'SELINUX=' /etc/selinux/config | awk '{print $2}')" != "permissive" ]]; then
     log "INFO" "Désactivation de SELinux définitive (fichier de config)"
     sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
 fi
