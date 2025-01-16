@@ -13,22 +13,21 @@ log "INFO" "Le script d'autoconfiguration a démarré"
 
 log "INFO" "Le script a bien été lancé en root"
 
-if [[ "$(sestatus | grep 'Current mode' | awk '{print $3}')" != "permissive" ]]; then
+if [[ "$(sestatus | grep 'Current mode' | awk '{print $3}')" != "enforcing" ]]; then
     log "WARN" "SELinux est toujours activé !"
     log "INFO" "Désactivation de SELinux temporaire (setenforce)"
     setenforce 0
 fi
 
-if [[ "$(grep 'SELINUX=' /etc/selinux/config | awk '{print $2}')" != "permissive" ]]; then
+if [[ "$(grep 'SELINUX=' /etc/selinux/config | awk '{print $2}')" != "enforcing" ]]; then
     log "INFO" "Désactivation de SELinux définitive (fichier de config)"
     sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
 fi
 
 if [[ "$(systemctl is-active firewalld)" != "active" ]]; then
     log "ERROR" "Le firewall (firewalld) n'est pas actif. Veuillez activer le firewall avant de continuer."
-                                                         [ Read 77 lines ]
-    exit 1
-else
+
+    else
     log "INFO" "Service de firewalling firewalld est activé"
 fi
 
@@ -54,14 +53,19 @@ firewall-cmd --permanent --add-port=$new_port/tcp
 firewall-cmd --reload
 echo "$(date +%H:%M:%S) [INFO] Port 22 fermé et $new_port ouvert dans le firewall."
 fi
-
-
-if [[ "$(hostnamectl --static)" = "localhost" ]]; then
-    echo "$(date +%H:%M:%S) [WARN] La machine s'appelle toujours localhost !"
-    hostnamectl set-hostname "music.tp3.b3"
-    echo "$(date +%H:%M:%S) [INFO] Changement du nom pour music.tp3.b3"
+if [ "$(hostname)" = "localhost" ] || [ "$(hostname)" = "vbox" ];
+then
+echo "$(date +%H:%M:%S) [WARN] Toujours en localhost"
+    if [ -z "$1" ];
+    then
+        echo "Fournit un nom de machine en argument"
+        exit
+    else
+        hostnamectl set-hostname "$1"
+        echo "$(date +%H:%M:%S) [INFO] Nom de machine modifié en $(hostname)"
+    fi
 else
-    echo "Le nom de la machine n'est pas localhost. Aucun changement effectué."
+    echo " Le nom goatesque de la machine devient $(hostname)"
 fi
 
 
@@ -72,6 +76,7 @@ if id "$(whoami)" &>/dev/null; then
         sudo usermod -aG wheel "$(whoami)"
     else
         log "INFO" "L'utilisateur $(whoami) est déjà dans le groupe wheel."
-    fi
+        fi
 fi
 log "INFO" "Le script d'autoconfiguration s'est correctement déroulé"
+
