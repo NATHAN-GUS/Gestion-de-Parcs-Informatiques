@@ -108,7 +108,14 @@ success
     <meta property="og:site_name" content="Jellyfin">
     <meta property="og:url" content="http://jellyfin.org">
     <meta property="og:description" content="The Free Software Media System">
-    <meta property="og:type" content="article">[nathan@monitoring ~]$ sudo /opt/autoconfig.sh monitoring.tp3.b1
+    <meta property="og:type" content="article">
+
+```
+
+# Partie III : Serveur de monitoring
+🌞 Dérouler le script autoconfig.sh développé à la partie I
+```sh
+[nathan@monitoring ~]$ sudo /opt/autoconfig.sh monitoring.tp3.b1
 15:03:30 [INFO] Le script d'autoconfiguration a démarré
 15:03:30 [INFO] Le script a bien été lancé en root
 15:03:30 [WARN] SELinux est toujours activé !
@@ -129,11 +136,74 @@ success
 ```
 
 🌞 Installer Netdata
-```sh
 
-    <meta id="themeColor" name="theme-color" content="#202020">
+-Commande
+```sh
+curl https://get.netdata.cloud/kickstart.sh > /tmp/netdata-kickstart.sh && sh /tmp/netdata-kickstart.sh --no-updates --stable-channel --disable-telemetry
+```
+-Firewall
+```sh
+[nathan@monitoring ~]$ sudo systemctl start netdata
+[nathan@monitoring ~]$ sudo ss -lntp
+State              Recv-Q             Send-Q                         Local Address:Port                          Peer Address:Port            Process
+LISTEN             0                  4096                                 0.0.0.0:19999                              0.0.0.0:*                users:(("netdata",pid=792,fd=6))
+LISTEN             0                  4096                               127.0.0.1:8125                               0.0.0.0:*                users:(("netdata",pid=792,fd=84))
+LISTEN             0                  128                                  0.0.0.0:22                                 0.0.0.0:*                users:(("sshd",pid=7415,fd=3))
+LISTEN             0                  4096                                   [::1]:8125                                  [::]:*                users:(("netdata",pid=792,fd=80))
+LISTEN             0                  4096                                    [::]:19999                                 [::]:*                users:(("netdata",pid=792,fd=7))
+LISTEN             0                  128                                     [::]:22                                    [::]:*                users:(("sshd",pid=7415,fd=4))
+
+[nathan@monitoring ~]$ sudo firewall-cmd --permanent --add-port=8125/tcp
+success
+[nathan@monitoring ~]$  sudo firewall-cmd --reload
+success
+```
+🌞 Ajouter un check TCP
+-commande
+```sh
+[nathan@monitoring ~]$ cd /etc/netdata 2>/dev/null || cd /opt/netdata/etc/netdata
+[nathan@monitoring netdata]$ sudo ./edit-config go.d/portcheck.conf
+```
+-check
+```sh
+jobs:
+ - name:jellyfin
+   host: 10.3.1.11
+   ports:
+        - 8096
 ```
 
-# Partie III : Serveur de monitoring
-🌞 Dérouler le script autoconfig.sh développé à la partie I
+🌞 Ajout d'une alerte Discord
+-commande
 ```sh
+[nathan@monitoring netdata]$ sudo nano /etc/netdata/health_alarm_notify.conf
+```
+-config alert
+```sh
+# enable/disable sending discord notifications
+SEND_DISCORD="YES"
+
+# Create a webhook by following the official documentation -
+# https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks
+DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/1330544266589638778/JHH7puNtgPlqWx1_fL0U1a4FCOYgDwmTBH-UtM9Rgb7f2HmHF7_nFDGzojAjkGUvvzoH"
+
+# if a role's recipients are not configured, a notification will be send to
+# this discord channel (empty = do not send a notification for unconfigured
+# roles):
+DEFAULT_RECIPIENT_DISCORD="alerts"
+```
+```sh
+[nathan@monitoring netdata]$ sudo systemctl restart netdata
+```
+
+# Partie IV : Serveur de backup
+## 3. Gestion du disque dur
+
+
+
+
+
+
+
+
+
