@@ -375,7 +375,10 @@ piupiupiupiu
 10.3.1.13:/mnt/backup  /mnt/music_backup  nfs  defaults,_netdev  0 0
 ```
 
-#### 5. Service de backup
+### 5. Service de backup
+#### A. Script de sauvegarde
+
+🌞 Script backup.sh
 
 
 
