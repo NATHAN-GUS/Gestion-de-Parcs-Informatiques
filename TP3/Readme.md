@@ -379,6 +379,92 @@ piupiupiupiu
 #### A. Script de sauvegarde
 
 🌞 Script backup.sh
+```sh
+[nathan@music ~]$ sudo chmod +x backup.sh
+[nathan@music ~]$ ./backup.sh
+Sauvegarde réussie : /mnt/music_backup/
+[nathan@music ~]$ ls -l /mnt/music_backup
+total 11276
+-rw-r--r--. 1 nathan nathan 11544503 Jan 20 11:27 music_250120_112741.tar.gz
+[nathan@music ~]$ c^C
+[nathan@music ~]$ tar -tf /mnt/music_backup/music_250120_112741.tar.gz
+./
+./Saweetie - I Want You This Christmas (Official Music Video).mp3
+./Tiakola x Genezio x Prototype - PONA NINI (Visual Mixtape).mp3
+./Don Miguelo - Y Que Fue_.mp3
+./David Okit - Les choses (Visualizer Officiel).mp3
+```
+### B. Sauvegarde à intervalles régulier
+
+🌞 Créer un nouveau service backup.service
+```sh
+[Unit]
+Description=Sauvegarde de la musique de Jellyfin
+
+[Service]
+Type=oneshot
+ExecStart=/opt/backup.sh
+
+[Install]
+WantedBy=multi-user.target
+```
+
+🌞 Indiquer au système qu'on a ajouté un nouveau service
+```sh
+[nathan@music ~]$ sudo systemctl daemon-reload
+```
+🌞 Utiliser et tester le nouveau service
+```sh
+[nathan@music ~]$ sudo systemctl enable backup.service
+Created symlink /etc/systemd/system/multi-user.target.wants/backup.service → /etc/systemd/system/backup.service.
+[nathan@music ~]$ sudo systemctl status backup
+[sudo] password for nathan:
+○ backup.service - Sauvegarde de la musique de Jellyfin
+     Loaded: loaded (/etc/systemd/system/backup.service; enabled; preset: disabled)
+     Active: inactive (dead)
+
+[nathan@music ~]$ sudo systemctl start backup
+```
+
+🌞 Faire un test et prouvez que ça a fonctionné
+```sh
+[nathan@music ~]$ sudo systemctl start backup
+[nathan@music ~]$ sudo systemctl status backup
+○ backup.service - Sauvegarde de la musique de Jellyfin
+     Loaded: loaded (/etc/systemd/system/backup.service; enabled; preset: disabled)
+     Active: inactive (dead) since Mon 2025-01-20 11:56:52 CET; 7s ago
+    Process: 1788 ExecStart=/opt/backup.sh (code=exited, status=0/SUCCESS)
+   Main PID: 1788 (code=exited, status=0/SUCCESS)
+        CPU: 1.076s
+
+Jan 20 11:56:51 music.tp3.b1 systemd[1]: Starting Sauvegarde de la musique de Jellyfin...
+Jan 20 11:56:52 music.tp3.b1 backup.sh[1788]: Sauvegarde réussie : /mnt/music_backup/
+Jan 20 11:56:52 music.tp3.b1 systemd[1]: backup.service: Deactivated successfully.
+Jan 20 11:56:52 music.tp3.b1 systemd[1]: Finished Sauvegarde de la musique de Jellyfin.
+Jan 20 11:56:52 music.tp3.b1 systemd[1]: backup.service: Consumed 1.076s CPU time.
+```
+
+🌞 Configurer un lancement automatique du service à intervalles réguliers
+```sh
+[nathan@music ~]$ sudo nano /etc/systemd/system/backup.timer
+[sudo] password for nathan:
+[nathan@music ~]$ sudo systemctl daemon-reload
+[nathan@music ~]$ sudo systemctl enable --now backup.timer
+Created symlink /etc/systemd/system/timers.target.wants/backup.timer → /etc/systemd/system/backup.timer.
+[nathan@music ~]$ sudo systemctl list-timers --all
+NEXT                        LEFT          LAST                        PASSED    UNIT                         ACTIVATES
+Mon 2025-01-20 12:56:51 CET 39min left    -                           -         backup.timer                 backup.service
+Mon 2025-01-20 13:56:17 CET 1h 38min left Mon 2025-01-20 12:05:15 CET 12min ago dnf-makecache.timer          dnf-makecache.service
+Tue 2025-01-21 00:00:00 CET 11h left      Mon 2025-01-20 02:06:10 CET 10h ago   logrotate.timer              logrotate.service
+Tue 2025-01-21 02:21:25 CET 14h left      Mon 2025-01-20 02:21:25 CET 9h ago    systemd-tmpfiles-clean.timer systemd-tmpfiles-clean.service
+
+4 timers listed.
+```
+
+
+
+
+
 
 
 
