@@ -1,0 +1,10 @@
+[Unit]
+Description=Sauvegarde music timer
+
+[Timer]
+OnUnitActiveSec=1h
+AccuracySec=1min
+Unit=backup.service
+
+[Install]
+WantedBy=timers.target
