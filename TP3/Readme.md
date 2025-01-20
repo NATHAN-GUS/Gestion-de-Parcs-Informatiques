@@ -1,5 +1,5 @@
 # Partie II : Serveur de streaming
-## 1. Préparation de la machine
+###  1. Préparation de la machine
 
 🌞 Exécution du script autoconfig.sh développé à la partie I
 ```sh
@@ -46,7 +46,7 @@ music
 'Don Miguelo - Y Que Fue_.mp3'                       'Tiakola x Genezio x Prototype - PONA NINI (Visual Mixtape).mp3'
 ```
 
-# 2. Installation du service de streaming
+### 2. Installation du service de streaming
 
 🌞 Installer le paquet jellyfin
 ```sh
@@ -197,7 +197,204 @@ DEFAULT_RECIPIENT_DISCORD="alerts"
 ```
 
 # Partie IV : Serveur de backup
-## 3. Gestion du disque dur
+###  3. Gestion du disque dur
+
+🌞 Partitionner le disque dur
+```sh
+[nathan@backup ~]$  sudo pvcreate /dev/sdb
+[sudo] password for nathan:
+  Physical volume "/dev/sdb" successfully created.
+[nathan@backup ~]$  sudo pvs
+  PV         VG      Fmt  Attr PSize   PFree
+  /dev/sda2  rl_vbox lvm2 a--  <19.00g    0
+  /dev/sdb           lvm2 ---    5.00g 5.00g
+[nathan@backup ~]$ sudo vgcreate data /dev/sdb
+  Volume group "data" successfully created
+[nathan@backup ~]$ sudo vgs
+  VG      #PV #LV #SN Attr   VSize   VFree
+  data      1   0   0 wz--n-  <5.00g <5.00g
+  rl_vbox   1   2   0 wz--n- <19.00g     0
+[nathan@backup ~]$ sudo lvcreate -L 5000MB data -n backup_data
+[sudo] password for nathan:
+  Logical volume "backup_data" created.
+[nathan@backup ~]$ sudo lvs
+  LV          VG      Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  backup_data data    -wi-a-----   4.88g
+  root        rl_vbox -wi-ao---- <17.00g
+  swap        rl_vbox -wi-ao----   2.00g
+```
+
+🌞 Formater la partition créée
+```sh
+[nathan@backup ~]$ sudo mkfs.ext4 /dev/data/backup_data
+mke2fs 1.46.5 (30-Dec-2021)
+Creating filesystem with 1280000 4k blocks and 320000 inodes
+Filesystem UUID: 05feddb9-e23c-40eb-9acf-dea93da664b6
+Superblock backups stored on blocks:
+        32768, 98304, 163840, 229376, 294912, 819200, 884736
+
+Allocating group tables: done
+Writing inode tables: done
+Creating journal (16384 blocks): done
+Writing superblocks and filesystem accounting information: done
+```
+
+🌞 Monter la partition
+```sh
+[nathan@backup ~]$ sudo mkdir /mnt/backup
+[nathan@backup ~]$ sudo mount /dev/data/backup_data /mnt/backup
+[nathan@backup ~]$ df -h
+Filesystem                    Size  Used Avail Use% Mounted on
+devtmpfs                      4.0M     0  4.0M   0% /dev
+tmpfs                         888M     0  888M   0% /dev/shm
+tmpfs                         355M  5.0M  350M   2% /run
+/dev/mapper/rl_vbox-root       17G  1.3G   16G   8% /
+/dev/sda1                     960M  230M  731M  24% /boot
+tmpfs                         178M     0  178M   0% /run/user/1000
+/dev/mapper/data-backup_data  4.8G   24K  4.5G   1% /mnt/backup
+[nathan@backup ~]$ df -h | grep backup
+/dev/mapper/data-backup_data  4.8G   24K  4.5G   1% /mnt/backup
+```
+
+🌞 Configurer un montage automatique de la partition
+```sh
+[nathan@backup ~]$ sudo nano /etc/fstab
+[sudo] password for nathan:
+```sh Ajout de : /dev/data/backup_data  /mnt/backup  ext4  defaults  0 2```
+[nathan@backup ~]$ sudo mount -av
+/                        : ignored
+/boot                    : already mounted
+none                     : ignored
+/mnt/backup              : already mounted
+[nathan@backup ~]$ sudo umount /mnt/backup
+[nathan@backup ~]$ sudo mount -av
+/                        : ignored
+/boot                    : already mounted
+none                     : ignored
+mount: /mnt/backup does not contain SELinux labels.
+       You just mounted a file system that supports labels which does not
+       contain labels, onto an SELinux box. It is likely that confined
+       applications will generate AVC messages and not be allowed access to
+       this file system.  For more details see restorecon(8) and mount(8).
+mount: (hint) your fstab has been modified, but systemd still uses
+       the old version; use 'systemctl daemon-reload' to reload.
+/mnt/backup              : successfully mounted
+```
+
+### 4. Service NFS
+#### A. El servor
+
+🌞 Installer et configurer un service NFS
+- Command
+```sh
+[nathan@backup ~]$ sudo dnf install nfs-utils
+
+- Config
+```sh
+[nathan@backup ~]$ sudo mkdir /var/nfs/general -p
+[nathan@backup ~]$ ls -dl /var/nfs/general
+drwxr-xr-x. 2 root root 6 Jan 19 23:33 /var/nfs/general
+[nathan@backup ~]$ sudo chown nobody /var/nfs/general
+[nathan@backup ~]$ sudo nano /etc/exports
+ Ajout des lignes suivantes :
+/mnt/backup 10.3.1.11(rw,sync,no_root_squash,no_subtree_check)
+
+- Recharger les Exports:
+[nathan@backup ~]$ sudo exportfs -ra
+
+- visual
+[nathan@backup ~]$  sudo systemctl enable nfs-server
+[nathan@backup ~]$ sudo systemctl start nfs-server
+[nathan@backup ~]$ sudo systemctl status nfs-server
+● nfs-server.service - NFS server and services
+     Loaded: loaded (/usr/lib/systemd/system/nfs-server.service; enabled; preset: disabled)
+    Drop-In: /run/systemd/generator/nfs-server.service.d
+             └─order-with-mounts.conf
+     Active: active (exited) since Sun 2025-01-19 23:47:05 CET; 59min ago
+       Docs: man:rpc.nfsd(8)
+             man:exportfs(8)
+   Main PID: 12348 (code=exited, status=0/SUCCESS)
+        CPU: 60ms
+```
+
+-Firewall 
+```sh
+[nathan@backup ~]$ sudo firewall-cmd --permanent --add-service=nfs
+success
+[nathan@backup ~]$ sudo firewall-cmd --permanent --add-service=mountd
+success
+[nathan@backup ~]$ sudo firewall-cmd --permanent --add-service=rpc-bind
+success
+[nathan@backup ~]$ sudo firewall-cmd --reload
+success
+[nathan@backup ~]$ sudo firewall-cmd --permanent --list-all | grep services
+[sudo] password for nathan:
+  services: cockpit dhcpv6-client mountd nfs rpc-bind ssh
+```
+
+🌞 Déterminer sur quel port écoute le service NFS
+```sh
+[nathan@backup ~]$ sudo ss -lntp | grep "rpc"
+LISTEN 0      4096         0.0.0.0:111        0.0.0.0:*    users:(("rpcbind",pid=12320,fd=4),("systemd",pid=1,fd=41))
+LISTEN 0      4096         0.0.0.0:51827      0.0.0.0:*    users:(("rpc.statd",pid=12322,fd=8))
+LISTEN 0      4096         0.0.0.0:20048      0.0.0.0:*    users:(("rpc.mountd",pid=12326,fd=5))
+LISTEN 0      4096            [::]:111           [::]:*    users:(("rpcbind",pid=12320,fd=6),("systemd",pid=1,fd=45))
+LISTEN 0      4096            [::]:44491         [::]:*    users:(("rpc.statd",pid=12322,fd=10))
+LISTEN 0      4096            [::]:20048         [::]:*    users:(("rpc.mountd",pid=12326,fd=7))
+```
+
+#### B. El cliente
+
+🌞 Installer les outils NFS
+```sh
+sudo dnf install nfs-utils
+```
+
+🌞 Essayer d'accéder au dossier partagé
+```sh
+[nathan@music ~]$ sudo mkdir /mnt/music_backup
+[nathan@music ~]$ sudo mount 10.3.1.13:/mnt/backup /mnt/music_backup
+[nathan@music ~]$ cd /mnt/music_backup/
+[nathan@music music_backup]$ echo "mypate full chium" | sudo tee /mnt/music_backup/test.txt
+[sudo] password for nathan:
+mypate full chium
+[nathan@music music_backup]$ echo "piupiupiupiu" | sudo tee -a /mnt/music_backup/test.txt
+piupiupiupiu
+[nathan@music music_backup]$
+[nathan@music music_backup]$ cat /mnt/music_backup/test.txt
+mypate full chium
+piupiupiupiu
+[nathan@music music_backup]$ sudo rm /mnt/music_backup/test.txt
+[nathan@music music_backup]$ ls
+[nathan@music music_backup]$
+```
+
+🌞 Configurer un montage automatique
+```sh
+[nathan@music music_backup]$ sudo nano /etc/fstab
+10.3.1.13:/mnt/backup  /mnt/music_backup  nfs  defaults,_netdev  0 0
+```
+
+#### 5. Service de backup
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
